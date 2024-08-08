@@ -8,11 +8,18 @@ void MediaQueue::addMedia(std::shared_ptr<Media> media)
     std::cout << "The queue size is: " << queue_.size() << std::endl;
 }
 
+std::shared_ptr<Media> MediaQueue::getCurrentMedia()
+{
+    if (queue_.empty())
+        return nullptr;
+    auto media = queue_.front(); // Use std::move to efficiently remove the media from the queue
+    return media;
+}
+
 std::shared_ptr<Media> MediaQueue::getNextMedia()
 {
     if (queue_.empty())
         return nullptr;
     auto media = std::move(queue_.front()); // Use std::move to efficiently remove the media from the queue
-    queue_.pop_front();
     return media;
 }

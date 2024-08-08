@@ -15,6 +15,7 @@ private:
     std::shared_ptr<Media> current_media;
 public:
     void play(std::shared_ptr<Media> media);
+    void pause();
     void stop();
 };
 

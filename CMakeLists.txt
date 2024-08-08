@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 project(pycpplink)
 set(CMAKE_CXX_STANDARD 20)
 
-set(SFML_INCLUDE_DIR "/opt/homebrew/include/SFML")
-include_directories(${SFML_INCLUDE_DIR})
+# Find Boost
+find_package(Boost REQUIRED COMPONENTS thread system filesystem regex)
+
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
@@ -21,6 +22,12 @@ add_executable(media_player src/media.cpp
                             src/queue.cpp
                             src/mediaManager.cpp)
 
+# Include Boost header directories
+target_include_directories(media_player PRIVATE ${Boost_INCLUDE_DIRS})
+
 target_link_libraries(media_player PRIVATE sfml-audio)
 target_link_libraries(media_player PRIVATE sfml-graphics)
+# Link against Boost libraries
+target_link_libraries(media_player PRIVATE ${Boost_LIBRARIES})
+
 target_compile_features(media_player PRIVATE cxx_std_17)

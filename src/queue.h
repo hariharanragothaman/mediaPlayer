@@ -14,6 +14,7 @@ private:
     std::deque<std::shared_ptr<Media>> queue_;
 public:
     void addMedia(std::shared_ptr<Media> media);
+    std::shared_ptr<Media> getCurrentMedia();
     std::shared_ptr<Media> getNextMedia();
 };
 

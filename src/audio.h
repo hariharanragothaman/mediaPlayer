@@ -30,6 +30,9 @@ public:
 
     void play();
 
+    void pause() override;
+    void stop() override;
+
     void playMedia() override
     {
         std::cout << "Playing - Audio file: " << file_path << std::endl;

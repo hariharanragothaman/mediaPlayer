@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
+#include <boost/thread.hpp>
 
 #include "audio.h"
 #include "loader.h"
 #include "mediaManager.h"
-
 
 int main()
 {
@@ -28,11 +28,18 @@ int main()
         }
         else if (input == "play")
         {
-            manager.playNext();
+            boost::thread play_thread(&MediaManager::play, &manager);
+        }
+        else if (input == "pause"){
+            boost::thread pause_thread(&MediaManager::pause, &manager);
+        }
+        else if (input == "stop")
+        {
+            manager.stop();
         }
         else if (input == "exit")
         {
-            running = false;
+            running = false;   
         }
         else
         {

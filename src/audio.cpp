@@ -12,3 +12,13 @@ void Audio::play()
         sf::sleep(sf::seconds(0.1));
     }
 }
+
+void Audio::pause() 
+{
+    music.pause();
+}
+
+void Audio::stop()
+{
+    music.stop();
+}

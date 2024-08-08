@@ -19,7 +19,10 @@ private:
 public:
     MediaManager(): loader_(), player_() {}
     void addMediaToQueue(const std::string& file_path, const std:: string& type);
+    void play();
+    void stop();
     void playNext();
+    void pause();
     void playMedia(const std::string& file_path, const std:: string& type);
 };
 
