@@ -21,6 +21,7 @@ public:
     void addMediaToQueue(const std::string& file_path, const std:: string& type);
     void playNext();
     void playMedia(const std::string& file_path, const std:: string& type);
+    void stopMedia();
 };
 
 

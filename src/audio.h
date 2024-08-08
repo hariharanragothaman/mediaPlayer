@@ -28,8 +28,6 @@ public:
         std::cout << "Audio file: " << file_path << std::endl;
     }
 
-    void play();
-
     void playMedia() override
     {
         std::cout << "Playing - Audio file: " << file_path << std::endl;
@@ -38,6 +36,10 @@ public:
         {
             sf::sleep(sf::seconds(0.1));
         }
+    }
+    void stopMedia()
+    {
+        music.stop();
     }
 };
 

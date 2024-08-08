@@ -15,7 +15,6 @@ FetchContent_MakeAvailable(SFML)
 
 add_executable(media_player src/media.cpp
                             src/main.cpp
-                            src/audio.cpp
                             src/loader.cpp
                             src/player.cpp
                             src/queue.cpp

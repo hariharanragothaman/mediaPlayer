@@ -6,15 +6,16 @@
 int main()
 {
 
+    /* Media Manager Object */
     MediaManager manager;
-
-
+    manager.addMediaToQueue("/Users/hariharanragothaman/Desktop/Music/example.mp3", "audio");
 
     /* GUI Begins */
 
     sf::RenderWindow window(sf::VideoMode(500, 500), "Media Player");
 
-    sf::Texture playTexture, stopTexture, pauseTexture, fastForwardTexture, rewindTexture;
+    sf::Texture playTexture,stopTexture, pauseTexture, fastForwardTexture, rewindTexture, shuffleTexture, loadMusicTexture;
+
     if (!playTexture.loadFromFile("play.png") ||
         !stopTexture.loadFromFile("stop.png") ||
         !pauseTexture.loadFromFile("pause.png"))
@@ -29,14 +30,17 @@ int main()
     sf::Sprite pauseButton(pauseTexture);
     sf::Sprite fastForwardButton(fastForwardTexture);
     sf::Sprite rewindButton(rewindTexture);
+    sf::Sprite shuffleButton(shuffleTexture);
+    sf::Sprite loadMusicButton(loadMusicTexture);
 
     playButton.setPosition(100, 100);
     stopButton.setPosition(160, 100);
     pauseButton.setPosition(220, 100);
-    fastForwardButton.setPosition(200, 200);
-    rewindButton.setPosition(200, 300);
+    fastForwardButton.setPosition(280, 100);
+    rewindButton.setPosition(340, 100);
 
-    while (window.isOpen()) {
+    while (window.isOpen())
+    {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
@@ -51,7 +55,7 @@ int main()
                 if (stopButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
                 {
                     std::cout << "Stop Button Pressed" << std::endl;
-                    // Trigger stop
+                    manager.stopMedia();
                 }
                 if (pauseButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
                 {

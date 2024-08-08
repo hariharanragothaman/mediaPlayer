@@ -24,6 +24,11 @@ void MediaManager::playNext()
     }
 }
 
+void MediaManager::stopMedia()
+{
+    player_.stop();
+}
+
 void MediaManager::playMedia(const std::string& file_path, const std::string& type)
 {
     auto media = loader_.loadMedia(file_path, type);
