@@ -4,8 +4,9 @@
 
 void Player::play(std::shared_ptr<Media> media)
 {
+    std::cout << "Player Class:: Beginning to Play Media" << std::endl;
     current_media = media;
-    current_media->displayInfo();
+    current_media->playMedia();
 }
 
 void Player::stop()

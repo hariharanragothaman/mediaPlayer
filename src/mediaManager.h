@@ -7,12 +7,15 @@
 
 #include "loader.h"
 #include "player.h"
+#include "queue.h"
 
 class MediaManager
 {
 private:
     Loader loader_;
     Player player_;
+    MediaQueue queue_;
+
 public:
     MediaManager(): loader_(), player_() {}
     void addMediaToQueue(const std::string& file_path, const std:: string& type);
