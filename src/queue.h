@@ -6,7 +6,6 @@
 #define PYCPPLINK_QUEUE_H
 
 #include <deque>
-
 #include "media.h"
 
 class MediaQueue

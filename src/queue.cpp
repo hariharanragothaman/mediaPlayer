@@ -1,5 +1,4 @@
 #include "queue.h"
-#include <deque>
 #include <iostream>
 
 

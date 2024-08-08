@@ -19,6 +19,7 @@ add_executable(media_player src/media.cpp
                             src/audio.cpp
                             src/loader.cpp
                             src/player.cpp
+                            src/queue.cpp
                             src/mediaManager.cpp)
 
 target_link_libraries(media_player PRIVATE sfml-audio)
