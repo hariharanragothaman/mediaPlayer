@@ -23,19 +23,6 @@ private:
     std::mutex mtx;
     std::condition_variable cv;
 
-//    void playback()
-//    {
-//        if(current_media)
-//        {
-//            current_media->playMedia();
-//            while(isPlaying)
-//            {
-//                std::this_thread::sleep_for(std::chrono::seconds(1));
-//            }
-//        }
-//        std::cout << "Stopped.. Playing Track" << std::endl;
-//    }
-
     void playback()
     {
         if (!current_media) return;
@@ -48,7 +35,7 @@ private:
             std::unique_lock<std::mutex> lock(mtx);
             cv.wait(lock, [this]{ return !isPaused; });  // Only proceed if not paused
 
-            // Simulate playback by sleeping and incrementing position
+            // call playback by sleeping and incrementing position
             current_media->playMedia();
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
