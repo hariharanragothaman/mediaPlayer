@@ -1,43 +1,84 @@
+#include <SFML/Graphics.hpp>
 #include <iostream>
-#include <string>
 
-#include "audio.h"
-#include "loader.h"
 #include "mediaManager.h"
-
 
 int main()
 {
+
     MediaManager manager;
-    bool running = true;
-    std::string input;
 
-    while (running)
+
+
+    /* GUI Begins */
+
+    sf::RenderWindow window(sf::VideoMode(500, 500), "Media Player");
+
+    sf::Texture playTexture, stopTexture, pauseTexture, fastForwardTexture, rewindTexture;
+    if (!playTexture.loadFromFile("play.png") ||
+        !stopTexture.loadFromFile("stop.png") ||
+        !pauseTexture.loadFromFile("pause.png"))
     {
-        std::cout << "Enter command (add/play/stop/exit): ";
-        std::cin >> input;
-
-        if (input == "add")
-        {
-            std::string file_path, type;
-            std::cout << "Enter file path: ";
-            std::cin >> file_path;
-            std::cout << "Enter media type (audio/video): ";
-            std::cin >> type;
-            manager.addMediaToQueue(file_path, type);
-        }
-        else if (input == "play")
-        {
-            manager.playNext();
-        }
-        else if (input == "exit")
-        {
-            running = false;
-        }
-        else
-        {
-            std::cout << "Unknown command." << std::endl;
-        }
+        std::cerr << "Failed to load button textures" << std::endl;
+        return 1;
     }
+
+
+    sf::Sprite playButton(playTexture);
+    sf::Sprite stopButton(stopTexture);
+    sf::Sprite pauseButton(pauseTexture);
+    sf::Sprite fastForwardButton(fastForwardTexture);
+    sf::Sprite rewindButton(rewindTexture);
+
+    playButton.setPosition(100, 100);
+    stopButton.setPosition(160, 100);
+    pauseButton.setPosition(220, 100);
+    fastForwardButton.setPosition(200, 200);
+    rewindButton.setPosition(200, 300);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (playButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Play Button Pressed" << std::endl;
+                    manager.playNext();
+                }
+                if (stopButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Stop Button Pressed" << std::endl;
+                    // Trigger stop
+                }
+                if (pauseButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Pause Button Pressed" << std::endl;
+                    // Trigger pause
+                }
+                if (fastForwardButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Fast Forward Button Pressed" << std::endl;
+                    // Trigger fast forward
+                }
+                if (rewindButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Rewind Button Pressed" << std::endl;
+                    // Trigger rewind
+                }
+            }
+        }
+
+        window.clear(sf::Color::Transparent);
+        window.draw(playButton);
+        window.draw(stopButton);
+        window.draw(pauseButton);
+        window.draw(fastForwardButton);
+        window.draw(rewindButton);
+        window.display();
+    }
+
     return 0;
 }
