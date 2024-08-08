@@ -8,7 +8,7 @@ int main()
 
     /* Media Manager Object */
     MediaManager manager;
-    manager.addMediaToQueue("/Users/hariharanragothaman/Desktop/Music/example.mp3", "audio");
+    manager.addMediaToQueue("/tmp/example.mp3", "audio");
 
     /* GUI Begins */
 

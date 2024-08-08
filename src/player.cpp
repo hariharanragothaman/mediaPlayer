@@ -11,6 +11,7 @@ void Player::play(std::shared_ptr<Media> media)
     }
     current_media = media;
     isPlaying = true;
+    isPaused = false;
     mediaThread = std::thread(&Player::playback, this);
 }
 
@@ -22,6 +23,17 @@ void Player::stop()
         std::cout << "Stopping: " << current_media << std::endl;
         current_media->stopMedia();
         mediaThread.join();
-        current_media = nullptr;
+        //current_media = nullptr;
     }
+}
+
+void Player::pause()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    isPaused = true;
+}
+
+bool Player::hasFinishedPlaying() const
+{
+    return !isPlaying;
 }
