@@ -3,8 +3,7 @@ project(pycpplink)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SFML_INCLUDE_DIR "/opt/homebrew/include/SFML")
-
-#include_directories(${SFML_INCLUDE_DIR})
+include_directories(${SFML_INCLUDE_DIR})
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
