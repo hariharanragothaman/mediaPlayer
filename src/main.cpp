@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <sstream>
 #include "mediaManager.h"
+#include "tinyfiledialogs.h"  // Include TinyFileDialogs header
+
 
 int main()
 {
@@ -99,6 +101,7 @@ int main()
                 if (loadMusicButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
                 {
                     std::cout << "Load Music Button Pressed" << std::endl;
+
                 }
             }
         }
