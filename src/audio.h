@@ -37,10 +37,11 @@ public:
             sf::sleep(sf::seconds(0.1));
         }
     }
-    void stopMedia()
+    void stopMedia() override
     {
         music.stop();
     }
+
 };
 
 #endif //PYCPPLINK_AUDIO_H

@@ -19,8 +19,8 @@ public:
     virtual void displayInfo() const = 0; // This function needs to be implemented by derived class to make it instantiable.
     virtual void playMedia() = 0;
     virtual void stopMedia() = 0;
-    // Non-Pure Virtual Functions
 
+    // Non-Pure Virtual Functions
 
 };
 
