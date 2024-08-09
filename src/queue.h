@@ -15,6 +15,10 @@ private:
 public:
     void addMedia(std::shared_ptr<Media> media);
     std::shared_ptr<Media> getNextMedia();
+    std::shared_ptr<Media> peekNextMedia();
+    void removeNextMedia();
+    bool isEmpty();
+
 };
 
 #endif //PYCPPLINK_QUEUE_H

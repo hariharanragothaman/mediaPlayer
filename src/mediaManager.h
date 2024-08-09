@@ -9,6 +9,9 @@
 #include "player.h"
 #include "queue.h"
 
+#include <SFML/Graphics.hpp>
+
+
 class MediaManager
 {
 private:
@@ -21,6 +24,9 @@ public:
     void addMediaToQueue(const std::string& file_path, const std:: string& type);
     void playNext();
     void playMedia(const std::string& file_path, const std:: string& type);
+    void stopMedia();
+    sf::Time getCurrentTime();
+    sf::Time getTotalTime();
 };
 
 

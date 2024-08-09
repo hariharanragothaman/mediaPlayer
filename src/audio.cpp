@@ -1,14 +1,12 @@
+#include <SFML/Graphics.hpp>
 #include "audio.h"
 
-#include <SFML/Audio.hpp>
-#include <iostream>
-
-void Audio::play()
+sf::Time Audio::getCurrentTime()
 {
-    std::cout << "Playing - Audio file: " << file_path << std::endl;
-    music.play();
-    while(music.getStatus() == sf::Music::Playing)
-    {
-        sf::sleep(sf::seconds(0.1));
-    }
+    return music.getPlayingOffset();
+}
+
+sf::Time Audio::getTotalTime()
+{
+    return music.getDuration();
 }

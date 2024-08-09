@@ -5,15 +5,35 @@
 void Player::play(std::shared_ptr<Media> media)
 {
     std::cout << "Player Class:: Beginning to Play Media" << std::endl;
+    if(mediaThread.joinable())
+    {
+        mediaThread.join();
+    }
     current_media = media;
-    current_media->playMedia();
+    isPlaying = true;
+    isPaused = false;
+    mediaThread = std::thread(&Player::playback, this);
 }
 
 void Player::stop()
 {
-    if (current_media)
+    isPlaying = false;
+    if (mediaThread.joinable())
     {
         std::cout << "Stopping: " << current_media << std::endl;
-        current_media = nullptr;
+        current_media->stopMedia();
+        mediaThread.join();
+        //current_media = nullptr;
     }
+}
+
+void Player::pause()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    isPaused = true;
+}
+
+bool Player::hasFinishedPlaying() const
+{
+    return !isPlaying;
 }
