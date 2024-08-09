@@ -52,10 +52,13 @@ int main()
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(500, 500), "Media Player");
 
-    sf::Texture playTexture, stopTexture, pauseTexture;
+    sf::Texture playTexture, stopTexture, pauseTexture, loadMusicTexture;
     if (!playTexture.loadFromFile("play.png") ||
         !stopTexture.loadFromFile("stop.png") ||
-        !pauseTexture.loadFromFile("pause.png")) {
+        !pauseTexture.loadFromFile("pause.png") ||
+        !loadMusicTexture.loadFromFile("loadMusic.png")
+        )
+    {
         std::cerr << "Failed to load button textures" << std::endl;
         return 1;
     }
@@ -63,10 +66,12 @@ int main()
     sf::Sprite playButton(playTexture);
     sf::Sprite stopButton(stopTexture);
     sf::Sprite pauseButton(pauseTexture);
+    sf::Sprite loadMusicButton(loadMusicTexture);
 
     playButton.setPosition(100, 100);
     stopButton.setPosition(160, 100);
     pauseButton.setPosition(220, 100);
+    loadMusicButton.setPosition(280, 100);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -74,18 +79,26 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if (playButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (playButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
                     std::cout << "Play Button Pressed" << std::endl;
                     manager.playNext();
                 }
-                if (stopButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
+                if (stopButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
                     std::cout << "Stop Button Pressed" << std::endl;
                     manager.stopMedia();
                 }
-                if (pauseButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
+                if (pauseButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
                     std::cout << "Pause Button Pressed" << std::endl;
                     manager.pauseMedia();
+                }
+                if (loadMusicButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+                {
+                    std::cout << "Load Music Button Pressed" << std::endl;
                 }
             }
         }
@@ -111,9 +124,9 @@ int main()
             float progress = currentTime.asSeconds() / totalTime.asSeconds();
 
             statusBar.setSize(sf::Vector2f(400 * progress, 10));  // Update the width of the status bar based on progress
-            std::cout << "Current Time: " << currentTime.asSeconds() << "s, "
-                      << "Total Time: " << totalTime.asSeconds() << "s, "
-                      << "Progress: " << progress * 100 << "%" << std::endl;
+//            std::cout << "Current Time: " << currentTime.asSeconds() << "s, "
+//                      << "Total Time: " << totalTime.asSeconds() << "s, "
+//                      << "Progress: " << progress * 100 << "%" << std::endl;
 
 
             // Update the current time text
@@ -136,6 +149,7 @@ int main()
         window.draw(playButton);
         window.draw(stopButton);
         window.draw(pauseButton);
+        window.draw(loadMusicButton);
 
         window.draw(statusBarBackground);
         window.draw(statusBar);  // Draw status bar first
