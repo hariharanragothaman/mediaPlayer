@@ -1,15 +1,16 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-
+#include <iomanip>
+#include <sstream>
 #include "mediaManager.h"
 
-#include <SFML/Graphics.hpp>
-#include <iostream>
-
-int main() {
+int main()
+{
+    /* MediaManger Object */
     MediaManager manager;
     manager.addMediaToQueue("/tmp/example.mp3", "audio");
 
+    /* Setting the bars for visualization */
     const int numBars = 64;
     std::vector<sf::RectangleShape> bars(numBars);
 
@@ -19,6 +20,34 @@ int main() {
         bars[i].setPosition(i * 7 + 25, 450);  // Position bars slightly lower (450 is lower in a 500px height window)
         bars[i].setOrigin(0, 0);  // Set origin to the bottom-left corner of the bar
     }
+
+
+    /* Setting the Status Track bar */
+    sf::RectangleShape statusBar(sf::Vector2f(15, 20));  // Initial width 0, height 10
+    statusBar.setFillColor(sf::Color::Green);
+    statusBar.setPosition(50, 200);  // Position it near the bottom of the window
+
+    /* Setting a background for the status bar */
+    // Create a background rectangle for the status bar
+    sf::RectangleShape statusBarBackground(sf::Vector2f(400, 10));  // Background size matches the maximum width of the status bar
+    statusBarBackground.setFillColor(sf::Color::Yellow);  // Fixed yellow background
+    statusBarBackground.setPosition(50, 200);  // Same position as the status bar
+
+
+
+    // Load a font for displaying the current time
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf")) {
+        std::cerr << "Failed to load font!" << std::endl;
+        return 1;
+    }
+
+    // Create a text object for the current time
+    sf::Text currentTimeText;
+    currentTimeText.setFont(font);
+    currentTimeText.setCharacterSize(12);  // Size of the text
+    currentTimeText.setFillColor(sf::Color::White);  // Text color
+    currentTimeText.setPosition(50, 180);  // Position it above the status bar
 
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(500, 500), "Media Player");
@@ -62,13 +91,40 @@ int main() {
         }
 
         // Move the update logic outside the event loop to ensure continuous updates
-        if (clock.getElapsedTime().asMilliseconds() > 100) {  // Update every 100ms
-            for (int i = 0; i < numBars; ++i) {
+        if (clock.getElapsedTime().asMilliseconds() > 100)
+        {  // Update every 100ms
+            for (int i = 0; i < numBars; ++i)
+            {
                 float amplitude = static_cast<float>(std::rand()) / RAND_MAX;
                 bars[i].setSize(sf::Vector2f(6, amplitude * 150));  // Adjust height (150 is the maximum height of bars)
                 bars[i].setPosition(bars[i].getPosition().x, 450 - bars[i].getSize().y);  // Adjust position to grow upwards
             }
             clock.restart();
+        }
+
+        // Update track status bar
+        sf::Time currentTime = manager.getCurrentTime();  // Assume this function gives the current playback time
+        sf::Time totalTime = manager.getTotalTime();      // Assume this function gives the total duration of the track
+
+        if (totalTime != sf::Time::Zero)
+        {
+            float progress = currentTime.asSeconds() / totalTime.asSeconds();
+
+            statusBar.setSize(sf::Vector2f(400 * progress, 10));  // Update the width of the status bar based on progress
+            std::cout << "Current Time: " << currentTime.asSeconds() << "s, "
+                      << "Total Time: " << totalTime.asSeconds() << "s, "
+                      << "Progress: " << progress * 100 << "%" << std::endl;
+
+
+            // Update the current time text
+            int minutes = static_cast<int>(currentTime.asSeconds()) / 60;
+            int seconds = static_cast<int>(currentTime.asSeconds()) % 60;
+
+            std::stringstream timeStream;
+            timeStream << std::setw(2) << std::setfill('0') << minutes << ":"
+                       << std::setw(2) << std::setfill('0') << seconds;
+            currentTimeText.setString(timeStream.str());
+
         }
 
         window.clear(sf::Color::Black);  // Use a solid background color
@@ -80,6 +136,11 @@ int main() {
         window.draw(playButton);
         window.draw(stopButton);
         window.draw(pauseButton);
+
+        window.draw(statusBarBackground);
+        window.draw(statusBar);  // Draw status bar first
+        window.draw(currentTimeText);
+
         window.display();
     }
 

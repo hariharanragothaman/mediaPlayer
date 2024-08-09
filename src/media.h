@@ -20,6 +20,7 @@ public:
     virtual void playMedia() = 0;
     virtual void stopMedia() = 0;
 
+
     // Non-Pure Virtual Functions
 
 };

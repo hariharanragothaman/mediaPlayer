@@ -42,6 +42,9 @@ public:
         music.stop();
     }
 
+    sf::Time getCurrentTime();
+    sf::Time getTotalTime();
+
 };
 
 #endif //PYCPPLINK_AUDIO_H
