@@ -85,7 +85,7 @@ int main()
                 }
                 if (pauseButton.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)) {
                     std::cout << "Pause Button Pressed" << std::endl;
-                    // Trigger pause
+                    manager.pauseMedia();
                 }
             }
         }

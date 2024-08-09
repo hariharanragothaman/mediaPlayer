@@ -25,6 +25,7 @@ public:
     void playNext();
     void playMedia(const std::string& file_path, const std:: string& type);
     void stopMedia();
+    void pauseMedia();
     sf::Time getCurrentTime();
     sf::Time getTotalTime();
 };

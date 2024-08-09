@@ -23,7 +23,7 @@ void Player::stop()
         std::cout << "Stopping: " << current_media << std::endl;
         current_media->stopMedia();
         mediaThread.join();
-        //current_media = nullptr;
+        current_media = nullptr;
     }
 }
 

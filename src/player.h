@@ -44,7 +44,9 @@ private:
             std::cout << "Playing... " << currentPos.count() << "s" << std::endl;
 
             if (!isPlaying)
-                break;
+            {
+                std::cout << "isPlaying is toggled" << std::endl;
+            }
         }
 
         isPlaying = false;

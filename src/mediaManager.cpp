@@ -30,6 +30,12 @@ void MediaManager::stopMedia()
     std::cout << "is Queue Empty: " << queue_.isEmpty() << std::endl;
 }
 
+void MediaManager::pauseMedia()
+{
+    player_.pause();
+    std::cout << "is Queue Empty: " << queue_.isEmpty() << std::endl;
+}
+
 void MediaManager::playMedia(const std::string& file_path, const std::string& type)
 {
     auto media = loader_.loadMedia(file_path, type);
