@@ -42,6 +42,10 @@ public:
         music.stop();
     }
 
+    void pauseMedia() override
+    {
+        music.pause();
+    }
     sf::Time getCurrentTime();
     sf::Time getTotalTime();
 

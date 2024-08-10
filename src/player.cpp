@@ -7,17 +7,16 @@ void Player::play(std::shared_ptr<Media> media)
     std::cout << "Player Class:: Beginning to Play Media" << std::endl;
     if(mediaThread.joinable())
     {
+        std::cout << "Joining the threads..." << std::endl;
         mediaThread.join();
     }
     current_media = media;
-    isPlaying = true;
-    isPaused = false;
     mediaThread = std::thread(&Player::playback, this);
+    isPlaying = true;
 }
 
 void Player::stop()
 {
-    isPlaying = false;
     if (mediaThread.joinable())
     {
         std::cout << "Stopping: " << current_media << std::endl;
@@ -29,8 +28,13 @@ void Player::stop()
 
 void Player::pause()
 {
-    std::lock_guard<std::mutex> lock(mtx);
-    isPaused = true;
+    std::cout << "Player Class:: Pausing Media" << std::endl;
+    if (mediaThread.joinable())
+    {
+        std::cout << "Pausing: " << current_media << std::endl;
+        current_media->pauseMedia();
+        mediaThread.join();
+    }
 }
 
 bool Player::hasFinishedPlaying() const
