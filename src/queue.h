@@ -1,9 +1,5 @@
-//
-// Created by Hariharan Ragothaman on 8/7/24.
-//
-
-#ifndef PYCPPLINK_QUEUE_H
-#define PYCPPLINK_QUEUE_H
+#ifndef MEDIAPLAYER_QUEUE_H
+#define MEDIAPLAYER_QUEUE_H
 
 #include <deque>
 #include "media.h"
@@ -15,10 +11,9 @@ private:
 public:
     void addMedia(std::shared_ptr<Media> media);
     std::shared_ptr<Media> getNextMedia();
-    std::shared_ptr<Media> peekNextMedia();
+    std::shared_ptr<Media> peekNextMedia() const;
     void removeNextMedia();
-    bool isEmpty();
-
+    bool isEmpty() const;
 };
 
-#endif //PYCPPLINK_QUEUE_H
+#endif //MEDIAPLAYER_QUEUE_H

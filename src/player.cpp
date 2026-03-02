@@ -1,43 +1,59 @@
 #include "player.h"
 #include <iostream>
 
-
 void Player::play(std::shared_ptr<Media> media)
 {
-    std::cout << "Player Class:: Beginning to Play Media" << std::endl;
-    if(mediaThread.joinable())
-    {
-        std::cout << "Joining the threads..." << std::endl;
-        mediaThread.join();
-    }
+    stop();
     current_media = media;
-    mediaThread = std::thread(&Player::playback, this);
     isPlaying = true;
+    isPaused = false;
+    mediaThread = std::thread(&Player::playback, this);
 }
 
 void Player::stop()
 {
+    if (current_media)
+    {
+        current_media->stopMedia();
+    }
     if (mediaThread.joinable())
     {
-        std::cout << "Stopping: " << current_media << std::endl;
-        current_media->stopMedia();
         mediaThread.join();
-        current_media = nullptr;
     }
+    current_media = nullptr;
+    isPlaying = false;
+    isPaused = false;
 }
 
 void Player::pause()
 {
-    std::cout << "Player Class:: Pausing Media" << std::endl;
-    if (mediaThread.joinable())
+    if (current_media && isPlaying && !isPaused)
     {
-        std::cout << "Pausing: " << current_media << std::endl;
         current_media->pauseMedia();
-        mediaThread.join();
+        isPaused = true;
+    }
+}
+
+void Player::resume()
+{
+    if (current_media && isPaused)
+    {
+        current_media->resumeMedia();
+        isPaused = false;
     }
 }
 
 bool Player::hasFinishedPlaying() const
 {
     return !isPlaying;
+}
+
+bool Player::getIsPaused() const
+{
+    return isPaused;
+}
+
+std::shared_ptr<Media> Player::getCurrentMedia() const
+{
+    return current_media;
 }

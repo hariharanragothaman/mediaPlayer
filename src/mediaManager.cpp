@@ -13,47 +13,69 @@ void MediaManager::addMediaToQueue(const std::string& file_path, const std::stri
 
 void MediaManager::playNext()
 {
-    auto media = queue_.peekNextMedia();
+    auto media = queue_.getNextMedia();
     if (media)
     {
-        player_.play(std::move(media));
+        player_.play(media);
     }
     else
     {
-        std::cout << "Queue is Empty - Please add a file to play" << std::endl;
+        std::cout << "Queue is empty -- add files to play" << std::endl;
     }
 }
 
 void MediaManager::stopMedia()
 {
     player_.stop();
-    std::cout << "is Queue Empty: " << queue_.isEmpty() << std::endl;
 }
 
 void MediaManager::pauseMedia()
 {
     player_.pause();
-    std::cout << "is Queue Empty: " << queue_.isEmpty() << std::endl;
+}
+
+void MediaManager::resumeMedia()
+{
+    player_.resume();
+}
+
+bool MediaManager::isPaused() const
+{
+    return player_.getIsPaused();
+}
+
+bool MediaManager::isPlaying() const
+{
+    return !player_.hasFinishedPlaying();
 }
 
 void MediaManager::playMedia(const std::string& file_path, const std::string& type)
 {
     auto media = loader_.loadMedia(file_path, type);
-    media->playMedia();
+    if (media)
+    {
+        player_.play(std::shared_ptr<Media>(std::move(media)));
+    }
 }
 
 sf::Time MediaManager::getCurrentTime()
 {
-    auto media = queue_.peekNextMedia();
-    std::shared_ptr<Audio> audio = std::dynamic_pointer_cast<Audio>(media);
-    auto time = audio->getCurrentTime();
-    return time;
+    auto media = player_.getCurrentMedia();
+    if (!media)
+        return sf::Time::Zero;
+    auto audio = std::dynamic_pointer_cast<Audio>(media);
+    if (!audio)
+        return sf::Time::Zero;
+    return audio->getCurrentTime();
 }
 
 sf::Time MediaManager::getTotalTime()
 {
-    auto media = queue_.peekNextMedia();
-    std::shared_ptr<Audio> audio = std::dynamic_pointer_cast<Audio>(media);
-    auto time = audio->getTotalTime();
-    return time;
+    auto media = player_.getCurrentMedia();
+    if (!media)
+        return sf::Time::Zero;
+    auto audio = std::dynamic_pointer_cast<Audio>(media);
+    if (!audio)
+        return sf::Time::Zero;
+    return audio->getTotalTime();
 }

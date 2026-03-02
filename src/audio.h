@@ -1,9 +1,5 @@
-//
-// Created by Hariharan Ragothaman on 8/7/24.
-//
-
-#ifndef PYCPPLINK_AUDIO_H
-#define PYCPPLINK_AUDIO_H
+#ifndef MEDIAPLAYER_AUDIO_H
+#define MEDIAPLAYER_AUDIO_H
 
 #include "media.h"
 #include <SFML/Audio.hpp>
@@ -23,6 +19,7 @@ public:
             throw std::runtime_error("Failed to load music file: " + file_path);
         }
     }
+
     void displayInfo() const override
     {
         std::cout << "Audio file: " << file_path << std::endl;
@@ -30,13 +27,14 @@ public:
 
     void playMedia() override
     {
-        std::cout << "Playing - Audio file: " << file_path << std::endl;
+        std::cout << "Playing audio: " << file_path << std::endl;
         music.play();
-        while(music.getStatus() == sf::Music::Playing)
+        while(music.getStatus() != sf::Music::Stopped)
         {
             sf::sleep(sf::seconds(0.1));
         }
     }
+
     void stopMedia() override
     {
         music.stop();
@@ -46,9 +44,14 @@ public:
     {
         music.pause();
     }
+
+    void resumeMedia() override
+    {
+        music.play();
+    }
+
     sf::Time getCurrentTime();
     sf::Time getTotalTime();
-
 };
 
-#endif //PYCPPLINK_AUDIO_H
+#endif //MEDIAPLAYER_AUDIO_H
