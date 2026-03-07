@@ -5,8 +5,18 @@
 #include <filesystem>
 #include "mediaManager.h"
 
-int main()
+static std::string assetPath(const std::string& filename, const std::string& exeDir)
 {
+    auto path = std::filesystem::path(exeDir) / filename;
+    if (std::filesystem::exists(path))
+        return path.string();
+    return filename;
+}
+
+int main(int argc, char* argv[])
+{
+    std::string exeDir = std::filesystem::canonical(argv[0]).parent_path().string();
+
     MediaManager manager;
     std::string mediaDirectory = "/tmp";
 
@@ -37,7 +47,7 @@ int main()
     statusBarBackground.setPosition(50, 200);
 
     sf::Font font;
-    if (!font.loadFromFile("arial.ttf")) {
+    if (!font.loadFromFile(assetPath("arial.ttf", exeDir))) {
         std::cerr << "Failed to load font!" << std::endl;
         return 1;
     }
@@ -58,11 +68,11 @@ int main()
     sf::RenderWindow window(sf::VideoMode(500, 500), "Media Player");
 
     sf::Texture playTexture, stopTexture, pauseTexture, loadMusicTexture, nextTrackTexture;
-    if (!playTexture.loadFromFile("play.png") ||
-        !stopTexture.loadFromFile("stop.png") ||
-        !pauseTexture.loadFromFile("pause.png") ||
-        !loadMusicTexture.loadFromFile("loadMusic.png") ||
-        !nextTrackTexture.loadFromFile("nextTrack.png"))
+    if (!playTexture.loadFromFile(assetPath("play.png", exeDir)) ||
+        !stopTexture.loadFromFile(assetPath("stop.png", exeDir)) ||
+        !pauseTexture.loadFromFile(assetPath("pause.png", exeDir)) ||
+        !loadMusicTexture.loadFromFile(assetPath("loadMusic.png", exeDir)) ||
+        !nextTrackTexture.loadFromFile(assetPath("nextTrack.png", exeDir)))
     {
         std::cerr << "Failed to load button textures" << std::endl;
         return 1;

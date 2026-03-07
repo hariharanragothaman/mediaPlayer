@@ -18,6 +18,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake g++ make
           sudo apt-get install -y libglu1-mesa-dev freeglut3-dev mesa-common-dev
+          sudo apt-get install -y libx11-dev libxrandr-dev libxcursor-dev libxi-dev
           sudo apt-get install -y libudev-dev libopenal-dev libvorbis-dev libflac-dev libfreetype-dev
 
       - name: Configure CMake
