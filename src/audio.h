@@ -50,8 +50,30 @@ public:
         music.play();
     }
 
-    sf::Time getCurrentTime();
-    sf::Time getTotalTime();
+    float getDurationSeconds() const override
+    {
+        return music.getDuration().asSeconds();
+    }
+
+    float getPlayingOffsetSeconds() const override
+    {
+        return music.getPlayingOffset().asSeconds();
+    }
+
+    void seekTo(float seconds) override
+    {
+        music.setPlayingOffset(sf::seconds(seconds));
+    }
+
+    void setVolume(float volume) override
+    {
+        music.setVolume(volume);
+    }
+
+    float getVolume() const override
+    {
+        return music.getVolume();
+    }
 };
 
 #endif //MEDIAPLAYER_AUDIO_H

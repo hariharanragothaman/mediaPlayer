@@ -1,6 +1,11 @@
 #include "player.h"
 #include <iostream>
 
+Player::~Player()
+{
+    stop();
+}
+
 void Player::play(std::shared_ptr<Media> media)
 {
     stop();
@@ -43,6 +48,29 @@ void Player::resume()
     }
 }
 
+void Player::seekTo(float seconds)
+{
+    if (current_media)
+    {
+        current_media->seekTo(seconds);
+    }
+}
+
+void Player::setVolume(float volume)
+{
+    if (current_media)
+    {
+        current_media->setVolume(volume);
+    }
+}
+
+float Player::getVolume() const
+{
+    if (current_media)
+        return current_media->getVolume();
+    return 100.f;
+}
+
 bool Player::hasFinishedPlaying() const
 {
     return !isPlaying;
@@ -56,4 +84,9 @@ bool Player::getIsPaused() const
 std::shared_ptr<Media> Player::getCurrentMedia() const
 {
     return current_media;
+}
+
+void Player::setOnTrackFinished(std::function<void()> callback)
+{
+    onTrackFinished = std::move(callback);
 }

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <functional>
 
 class Player
 {
@@ -14,6 +15,7 @@ private:
     std::thread mediaThread;
     std::atomic<bool> isPlaying{false};
     std::atomic<bool> isPaused{false};
+    std::function<void()> onTrackFinished;
 
     void playback()
     {
@@ -30,16 +32,26 @@ private:
         std::cout << "Playback finished" << std::endl;
         isPlaying = false;
         isPaused = false;
+
+        if (onTrackFinished)
+            onTrackFinished();
     }
 
 public:
+    ~Player();
+
     void play(std::shared_ptr<Media> media);
     void stop();
     void pause();
     void resume();
+    void seekTo(float seconds);
+    void setVolume(float volume);
+    float getVolume() const;
     bool hasFinishedPlaying() const;
     bool getIsPaused() const;
     std::shared_ptr<Media> getCurrentMedia() const;
+
+    void setOnTrackFinished(std::function<void()> callback);
 };
 
 #endif //MEDIAPLAYER_PLAYER_H

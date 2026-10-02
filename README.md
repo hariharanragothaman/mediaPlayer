@@ -32,11 +32,15 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🎵 **Audio Playback** | MP3 playback via SFML's audio module (`sf::Music` streaming) |
-| ▶️ **Transport Controls** | Play, Pause, Resume, Stop, and Next Track buttons |
-| 📊 **Visualization** | Animated frequency-style visualization bars (64 bars) |
-| 📈 **Progress Tracking** | Real-time progress bar with elapsed / total time display |
-| 🎶 **Media Queue** | Sequential playback queue — load multiple tracks, advance automatically |
+| 🎵 **Audio Playback** | MP3, OGG, WAV, FLAC playback via SFML's audio module (`sf::Music` streaming) |
+| ▶️ **Transport Controls** | Play, Pause, Resume, Stop, Next Track, and Previous Track |
+| 🔀 **Seek & Scrub** | Click or drag the progress bar to seek to any position in the track |
+| 🔊 **Volume Control** | Adjustable volume slider with drag support and keyboard shortcuts |
+| 📊 **Visualization** | Smooth animated frequency-style visualization bars (64 bars) |
+| 📈 **Progress Tracking** | Real-time progress bar with draggable knob, elapsed / total time display |
+| 🎶 **Playlist** | Persistent playlist with track navigation, click-to-play, and auto-advance |
+| 📂 **Folder Browser** | Built-in folder browser to load music from any directory |
+| 🎹 **Keyboard Shortcuts** | Space, S, N, P, Arrow keys for full keyboard-driven control |
 | 🧵 **Threaded Playback** | Dedicated playback thread keeps the UI responsive at all times |
 | 🏗️ **Extensible Design** | Abstract `Media` base class — add Video or other media types without touching the engine |
 | ⚙️ **Zero Dependencies** | SFML is fetched automatically via CMake FetchContent — just clone and build |
@@ -49,25 +53,30 @@
 graph LR
     A[Scan Directory] --> B[Loader]
     B --> C[Audio Objects]
-    C --> D[Media Queue]
+    C --> D[Playlist]
     D --> E[Player Thread]
     E --> F[sf::Music Playback]
 
-    G[UI Event Loop] --> H{Button Click}
+    G[UI Event Loop] --> H{User Input}
     H -->|Play / Resume| E
     H -->|Pause| E
     H -->|Stop| E
-    H -->|Next Track| D
+    H -->|Next / Previous| D
+    H -->|Seek| E
+    H -->|Volume| E
+    H -->|Load Folder| A
+    H -->|Click Track| D
 
     E --> I[Progress Bar + Timer]
     E --> J[Visualization Bars]
+    E -->|Track Finished| D
 ```
 
-1. **Scan** — On startup, the player scans a directory for `.mp3` files and loads them into the media queue.
+1. **Scan** — On startup (or via the folder browser), the player scans a directory for audio files (`.mp3`, `.ogg`, `.wav`, `.flac`) and loads them into the playlist.
 2. **Load** — The `Loader` factory creates `Audio` objects (wrapping `sf::Music`) for each file.
-3. **Queue** — Tracks are held in a `std::deque`-backed queue with peek, pop, and add operations.
-4. **Play** — The `Player` spawns a dedicated thread that streams audio via SFML while the main thread renders the UI.
-5. **Render** — The SFML event loop handles button clicks, updates the progress bar, and animates the visualization.
+3. **Playlist** — Tracks are held in a persistent `std::vector` with index-based navigation (next, previous, jump-to-track).
+4. **Play** — The `Player` spawns a dedicated thread that streams audio via SFML while the main thread renders the UI. When a track finishes, the next track auto-advances.
+5. **Render** — The SFML event loop handles button clicks, keyboard shortcuts, seek/volume dragging, playlist clicks, and animates the visualization.
 
 ---
 
@@ -103,12 +112,27 @@ cmake --build build
 
 ### Usage
 
-By default, the player scans `/tmp` for `.mp3` files on startup. Drop some MP3s there and launch the player:
+By default, the player scans `~/Music` for audio files on startup. You can also pass a directory as a command-line argument:
 
 ```bash
-cp ~/Music/*.mp3 /tmp/
-cd build && ./media_player
+cd build && ./media_player                   # scans ~/Music
+cd build && ./media_player /path/to/music    # scans given directory
 ```
+
+Once running, use the built-in folder browser (click the Load button or press `L`) to load music from any folder.
+
+#### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Space` | Play / Pause toggle |
+| `S` | Stop |
+| `N` / `→` | Next track |
+| `P` / `←` | Previous track |
+| `↑` | Volume up |
+| `↓` | Volume down |
+| `L` | Open folder browser |
+| `Esc` | Close folder browser |
 
 ---
 
@@ -118,10 +142,11 @@ cd build && ./media_player
 
 | Decision | Rationale |
 |----------|-----------|
-| **Abstract `Media` base class** | Makes it straightforward to add Video, Podcast, or other types without modifying the playback engine |
+| **Abstract `Media` base class** | All playback operations (play, pause, seek, volume) are virtual — add Video or other types without modifying the engine |
 | **Dedicated playback thread** | SFML audio streaming blocks until the track finishes — a separate thread keeps the UI at 60 fps |
-| **`std::atomic` for state flags** | `isPlaying` and `isPaused` are accessed from both the UI and playback threads — atomics avoid data races |
-| **Facade pattern (`MediaManager`)** | Coordinates Loader, Queue, and Player behind a single interface so `main.cpp` stays simple |
+| **`std::atomic` for state flags** | `isPlaying`, `isPaused`, and `autoAdvancePending` are accessed from both threads — atomics avoid data races |
+| **Auto-advance callback** | Player fires an `onTrackFinished` callback so MediaManager automatically advances to the next track |
+| **Facade pattern (`MediaManager`)** | Coordinates Loader, Playlist, and Player behind a single interface so `main.cpp` stays simple |
 | **CMake FetchContent for SFML** | Zero manual dependency setup — clone, configure, build. Works on macOS and Linux out of the box |
 
 ### Component Diagram
@@ -130,15 +155,19 @@ cd build && ./media_player
 graph TB
     subgraph UI ["UI Layer (main.cpp)"]
         Window[SFML RenderWindow]
-        Buttons[Play / Stop / Pause / Next]
-        ProgressBar[Progress Bar + Timer]
+        Buttons[Play / Stop / Pause / Next / Prev]
+        ProgressBar[Seekable Progress Bar]
+        Volume[Volume Slider]
+        Playlist[Playlist Panel]
+        Browser[Folder Browser]
         Viz[Visualization Bars]
+        KBD[Keyboard Shortcuts]
     end
 
     subgraph Engine ["Engine Layer"]
         MM[MediaManager]
         Player[Player]
-        Queue[MediaQueue]
+        Queue[MediaQueue / Playlist]
         Loader[Loader]
     end
 
@@ -149,13 +178,18 @@ graph TB
     end
 
     Buttons --> MM
+    KBD --> MM
+    Browser -->|loadDirectory| MM
+    Playlist -->|playTrackAt| MM
     MM --> Player
     MM --> Queue
     MM --> Loader
     Loader --> Audio
     Audio --> SFMusic
     Player -->|spawns thread| Audio
+    Player -->|onTrackFinished| MM
     Player --> ProgressBar
+    Player --> Volume
     Player --> Viz
     Queue --> Audio
 ```
@@ -197,30 +231,35 @@ This is a learning project aiming toward VLC-level understanding of media player
 
 ### Completed
 
-- [x] Audio playback (MP3) via SFML
+- [x] Audio playback (MP3, OGG, WAV, FLAC) via SFML
 - [x] Play, Pause, Resume, Stop controls
-- [x] Next Track with queue advancement
+- [x] Next Track / Previous Track navigation
 - [x] Threaded playback (UI stays responsive)
-- [x] Progress bar with elapsed / total time
-- [x] Animated visualization bars
-- [x] Media queue with sequential playback
+- [x] Seekable progress bar with drag support
+- [x] Volume control slider with drag support
+- [x] Current track name and index display
+- [x] Keyboard shortcuts (Space, S, N, P, arrows, L)
+- [x] Playlist panel with click-to-play
+- [x] Built-in folder browser for loading music
+- [x] Auto-advance to next track on completion
+- [x] Smooth animated visualization bars
 - [x] CI pipeline (GitHub Actions)
 
 ### Up Next
 
-- [ ] Seek / scrub via progress bar click
-- [ ] Volume control slider
-- [ ] Keyboard shortcuts (Space = pause, N = next, etc.)
-- [ ] File browser dialog for loading media
+- [ ] Shuffle mode
+- [ ] Repeat modes (repeat-all, repeat-one)
+- [ ] Playlist save/load (M3U format)
+- [ ] Real audio spectrum visualization (FFT-based)
+- [ ] Equalizer (bass, mid, treble)
 
 ### Future
 
 - [ ] Video playback support
-- [ ] Playlist management (load/save, reorder, shuffle)
-- [ ] Equalizer (bass, mid, treble)
-- [ ] Real audio spectrum visualization (FFT-based)
-- [ ] Support for more formats (FLAC, WAV, OGG, MP4, AVI)
+- [ ] Skinnable UI / theming
+- [ ] Album art display
 - [ ] Subtitle rendering
+- [ ] System media key integration
 - [ ] Cross-platform packaging (DMG, AppImage, MSI)
 
 ---
