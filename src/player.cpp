@@ -9,25 +9,38 @@ Player::~Player()
 void Player::play(std::shared_ptr<Media> media)
 {
     stop();
-    current_media = media;
+    current_media = std::move(media);
     isPlaying = true;
     isPaused = false;
-    mediaThread = std::thread(&Player::playback, this);
+    std::cout << "Starting playback: ";
+    current_media->displayInfo();
+    current_media->playMedia();
+}
+
+void Player::update()
+{
+    if (!isPlaying || isPaused || !current_media || !current_media->isStopped())
+        return;
+
+    std::cout << "Playback finished (ended)" << std::endl;
+    isPlaying = false;
+    isPaused = false;
+
+    if (onTrackFinished)
+        onTrackFinished();
 }
 
 void Player::stop()
 {
+    isPlaying = false;
+    isPaused = false;
+
     if (current_media)
     {
         current_media->stopMedia();
     }
-    if (mediaThread.joinable())
-    {
-        mediaThread.join();
-    }
+
     current_media = nullptr;
-    isPlaying = false;
-    isPaused = false;
 }
 
 void Player::pause()

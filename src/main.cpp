@@ -180,12 +180,10 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    sf::Texture playTexture, stopTexture, pauseTexture, loadMusicTexture, nextTrackTexture;
+    sf::Texture playTexture, stopTexture, pauseTexture;
     if (!playTexture.loadFromFile(assetPath("play.png", exeDir)) ||
         !stopTexture.loadFromFile(assetPath("stop.png", exeDir)) ||
-        !pauseTexture.loadFromFile(assetPath("pause.png", exeDir)) ||
-        !loadMusicTexture.loadFromFile(assetPath("loadMusic.png", exeDir)) ||
-        !nextTrackTexture.loadFromFile(assetPath("nextTrack.png", exeDir)))
+        !pauseTexture.loadFromFile(assetPath("pause.png", exeDir)))
     {
         std::cerr << "Failed to load button textures" << std::endl;
         return 1;
@@ -194,8 +192,6 @@ int main(int argc, char* argv[])
     sf::Sprite playButton(playTexture);
     sf::Sprite stopButton(stopTexture);
     sf::Sprite pauseButton(pauseTexture);
-    sf::Sprite loadMusicButton(loadMusicTexture);
-    sf::Sprite nextTrackButton(nextTrackTexture);
 
     float btnY = 110.f;
     float btnStartX = 170.f;
@@ -203,8 +199,43 @@ int main(int argc, char* argv[])
     playButton.setPosition(btnStartX, btnY);
     stopButton.setPosition(btnStartX + btnSpacing, btnY);
     pauseButton.setPosition(btnStartX + 2 * btnSpacing, btnY);
-    loadMusicButton.setPosition(btnStartX + 3 * btnSpacing, btnY);
-    nextTrackButton.setPosition(btnStartX + 4 * btnSpacing, btnY);
+
+    const sf::Vector2f loadButtonPosition(btnStartX + 3 * btnSpacing, btnY);
+    sf::CircleShape loadFolderButton(24.f);
+    loadFolderButton.setPosition(loadButtonPosition);
+    loadFolderButton.setFillColor(sf::Color::Transparent);
+    loadFolderButton.setOutlineColor(sf::Color(220, 170, 0));
+    loadFolderButton.setOutlineThickness(4.f);
+
+    sf::ConvexShape loadFolderIcon;
+    loadFolderIcon.setPointCount(6);
+    loadFolderIcon.setPoint(0, sf::Vector2f(0.f, 4.f));
+    loadFolderIcon.setPoint(1, sf::Vector2f(10.f, 4.f));
+    loadFolderIcon.setPoint(2, sf::Vector2f(14.f, 9.f));
+    loadFolderIcon.setPoint(3, sf::Vector2f(28.f, 9.f));
+    loadFolderIcon.setPoint(4, sf::Vector2f(28.f, 25.f));
+    loadFolderIcon.setPoint(5, sf::Vector2f(0.f, 25.f));
+    loadFolderIcon.setPosition(loadButtonPosition.x + 10.f, loadButtonPosition.y + 10.f);
+    loadFolderIcon.setFillColor(sf::Color(220, 170, 0));
+
+    const sf::Vector2f nextButtonPosition(btnStartX + 4 * btnSpacing, btnY);
+    sf::CircleShape nextTrackButton(24.f);
+    nextTrackButton.setPosition(nextButtonPosition);
+    nextTrackButton.setFillColor(sf::Color::Transparent);
+    nextTrackButton.setOutlineColor(sf::Color(220, 170, 0));
+    nextTrackButton.setOutlineThickness(4.f);
+
+    sf::ConvexShape nextTrackArrow;
+    nextTrackArrow.setPointCount(3);
+    nextTrackArrow.setPoint(0, sf::Vector2f(0.f, 0.f));
+    nextTrackArrow.setPoint(1, sf::Vector2f(0.f, 22.f));
+    nextTrackArrow.setPoint(2, sf::Vector2f(17.f, 11.f));
+    nextTrackArrow.setPosition(nextButtonPosition.x + 12.f, nextButtonPosition.y + 13.f);
+    nextTrackArrow.setFillColor(sf::Color(220, 170, 0));
+
+    sf::RectangleShape nextTrackBar(sf::Vector2f(4.f, 22.f));
+    nextTrackBar.setPosition(nextButtonPosition.x + 31.f, nextButtonPosition.y + 13.f);
+    nextTrackBar.setFillColor(sf::Color(220, 170, 0));
 
     const float PROGRESS_X = 50.f;
     const float PROGRESS_Y = 200.f;
@@ -305,6 +336,7 @@ int main(int argc, char* argv[])
     FolderBrowser browser;
     float currentVolume = 100.f;
     bool draggingProgress = false;
+    float seekPreviewSeconds = 0.f;
     bool draggingVolume = false;
 
     sf::Clock vizClock;
@@ -420,7 +452,7 @@ int main(int argc, char* argv[])
                     manager.stopMedia();
                     manager.playNext();
                 }
-                else if (loadMusicButton.getGlobalBounds().contains(mx, my))
+                else if (loadFolderButton.getGlobalBounds().contains(mx, my))
                 {
                     browser.open(homeDir);
                 }
@@ -430,9 +462,10 @@ int main(int argc, char* argv[])
                 {
                     draggingProgress = true;
                     float ratio = (mx - PROGRESS_X) / PROGRESS_W;
+                    ratio = std::max(0.f, std::min(1.f, ratio));
                     float totalSec = manager.getTotalTimeSeconds();
                     if (totalSec > 0.f)
-                        manager.seekTo(ratio * totalSec);
+                        seekPreviewSeconds = ratio * totalSec;
                 }
 
                 sf::FloatRect volumeRect(VOLUME_X, VOLUME_Y - 5, VOLUME_W, VOLUME_H + 10);
@@ -460,6 +493,9 @@ int main(int argc, char* argv[])
 
             if (event.type == sf::Event::MouseButtonReleased)
             {
+                if (draggingProgress)
+                    manager.seekTo(seekPreviewSeconds);
+
                 draggingProgress = false;
                 draggingVolume = false;
             }
@@ -473,7 +509,7 @@ int main(int argc, char* argv[])
                     ratio = std::max(0.f, std::min(1.f, ratio));
                     float totalSec = manager.getTotalTimeSeconds();
                     if (totalSec > 0.f)
-                        manager.seekTo(ratio * totalSec);
+                        seekPreviewSeconds = ratio * totalSec;
                 }
                 if (draggingVolume)
                 {
@@ -497,7 +533,7 @@ int main(int argc, char* argv[])
             {
                 for (int i = 0; i < numBars; ++i)
                 {
-                    barTargets[i] = (static_cast<float>(std::rand()) / RAND_MAX) * 130.f;
+                    barTargets[i] = (static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX)) * 130.f;
                 }
             }
             else
@@ -515,7 +551,7 @@ int main(int argc, char* argv[])
             bars[i].setPosition(bars[i].getPosition().x, 560.f - barCurrents[i]);
         }
 
-        float curSec = manager.getCurrentTimeSeconds();
+        float curSec = draggingProgress ? seekPreviewSeconds : manager.getCurrentTimeSeconds();
         float totSec = manager.getTotalTimeSeconds();
         float progress = (totSec > 0.f) ? (curSec / totSec) : 0.f;
 
@@ -559,8 +595,11 @@ int main(int argc, char* argv[])
         window.draw(playButton);
         window.draw(stopButton);
         window.draw(pauseButton);
-        window.draw(loadMusicButton);
+        window.draw(loadFolderButton);
+        window.draw(loadFolderIcon);
         window.draw(nextTrackButton);
+        window.draw(nextTrackArrow);
+        window.draw(nextTrackBar);
 
         window.draw(currentTimeText);
         window.draw(totalTimeText);

@@ -5,7 +5,6 @@
 #include "player.h"
 #include "queue.h"
 
-#include <atomic>
 #include <string>
 #include <vector>
 
@@ -15,7 +14,7 @@ private:
     Loader loader_;
     Player player_;
     MediaQueue queue_;
-    std::atomic<bool> autoAdvancePending_{false};
+    bool autoAdvancePending_{false};
 
 public:
     MediaManager();

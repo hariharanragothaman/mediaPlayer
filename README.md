@@ -41,7 +41,7 @@
 | 🎶 **Playlist** | Persistent playlist with track navigation, click-to-play, and auto-advance |
 | 📂 **Folder Browser** | Built-in folder browser to load music from any directory |
 | 🎹 **Keyboard Shortcuts** | Space, S, N, P, Arrow keys for full keyboard-driven control |
-| 🧵 **Threaded Playback** | Dedicated playback thread keeps the UI responsive at all times |
+| 🧵 **Asynchronous Playback** | SFML streams audio on its internal worker thread while the UI stays responsive |
 | 🏗️ **Extensible Design** | Abstract `Media` base class — add Video or other media types without touching the engine |
 | ⚙️ **Zero Dependencies** | SFML is fetched automatically via CMake FetchContent — just clone and build |
 
@@ -54,8 +54,8 @@ graph LR
     A[Scan Directory] --> B[Loader]
     B --> C[Audio Objects]
     C --> D[Playlist]
-    D --> E[Player Thread]
-    E --> F[sf::Music Playback]
+    D --> E[Player State]
+    E --> F[sf::Music Async Streaming]
 
     G[UI Event Loop] --> H{User Input}
     H -->|Play / Resume| E
@@ -75,8 +75,8 @@ graph LR
 1. **Scan** — On startup (or via the folder browser), the player scans a directory for audio files (`.mp3`, `.ogg`, `.wav`, `.flac`) and loads them into the playlist.
 2. **Load** — The `Loader` factory creates `Audio` objects (wrapping `sf::Music`) for each file.
 3. **Playlist** — Tracks are held in a persistent `std::vector` with index-based navigation (next, previous, jump-to-track).
-4. **Play** — The `Player` spawns a dedicated thread that streams audio via SFML while the main thread renders the UI. When a track finishes, the next track auto-advances.
-5. **Render** — The SFML event loop handles button clicks, keyboard shortcuts, seek/volume dragging, playlist clicks, and animates the visualization.
+4. **Play** — The `Player` controls SFML's asynchronous audio stream while the main thread renders the UI. When a track finishes, the next track auto-advances.
+5. **Render** — The SFML event loop handles button clicks, keyboard shortcuts, seek previews, volume dragging, playlist clicks, and animates the visualization.
 
 ---
 
@@ -143,8 +143,8 @@ Once running, use the built-in folder browser (click the Load button or press `L
 | Decision | Rationale |
 |----------|-----------|
 | **Abstract `Media` base class** | All playback operations (play, pause, seek, volume) are virtual — add Video or other types without modifying the engine |
-| **Dedicated playback thread** | SFML audio streaming blocks until the track finishes — a separate thread keeps the UI at 60 fps |
-| **`std::atomic` for state flags** | `isPlaying`, `isPaused`, and `autoAdvancePending` are accessed from both threads — atomics avoid data races |
+| **SFML-managed audio thread** | `sf::Music::play()` is asynchronous, so SFML handles streaming without a second application-owned playback thread |
+| **Single-threaded player state** | Playback controls and auto-advance run in the UI loop, avoiding races during seek, stop, and track changes |
 | **Auto-advance callback** | Player fires an `onTrackFinished` callback so MediaManager automatically advances to the next track |
 | **Facade pattern (`MediaManager`)** | Coordinates Loader, Playlist, and Player behind a single interface so `main.cpp` stays simple |
 | **CMake FetchContent for SFML** | Zero manual dependency setup — clone, configure, build. Works on macOS and Linux out of the box |
@@ -186,7 +186,7 @@ graph TB
     MM --> Loader
     Loader --> Audio
     Audio --> SFMusic
-    Player -->|spawns thread| Audio
+    Player -->|controls| Audio
     Player -->|onTrackFinished| MM
     Player --> ProgressBar
     Player --> Volume
@@ -204,8 +204,8 @@ mediaPlayer/
 │   ├── main.cpp              # SFML window, event loop, UI rendering
 │   ├── media.h / media.cpp   # Abstract base class for all media types
 │   ├── audio.h / audio.cpp   # Audio implementation (wraps sf::Music)
-│   ├── player.h / player.cpp # Threaded playback engine
-│   ├── queue.h / queue.cpp   # std::deque-backed media queue
+│   ├── player.h / player.cpp # Playback state and transport controls
+│   ├── queue.h / queue.cpp   # std::vector-backed persistent playlist
 │   ├── loader.h / loader.cpp # Factory: file path → Media object
 │   └── mediaManager.h/.cpp   # Facade coordinating loader, queue, player
 ├── assets/                   # UI assets (button icons, fonts)
@@ -234,7 +234,7 @@ This is a learning project aiming toward VLC-level understanding of media player
 - [x] Audio playback (MP3, OGG, WAV, FLAC) via SFML
 - [x] Play, Pause, Resume, Stop controls
 - [x] Next Track / Previous Track navigation
-- [x] Threaded playback (UI stays responsive)
+- [x] Asynchronous SFML playback (UI stays responsive)
 - [x] Seekable progress bar with drag support
 - [x] Volume control slider with drag support
 - [x] Current track name and index display

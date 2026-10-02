@@ -10,6 +10,8 @@ class Audio: public Media
 {
 private:
     sf::Music music;
+    float cachedDuration{0.f};
+
 public:
     explicit Audio(const std::string& file)
     {
@@ -18,6 +20,7 @@ public:
         {
             throw std::runtime_error("Failed to load music file: " + file_path);
         }
+        cachedDuration = music.getDuration().asSeconds();
     }
 
     void displayInfo() const override
@@ -29,10 +32,6 @@ public:
     {
         std::cout << "Playing audio: " << file_path << std::endl;
         music.play();
-        while(music.getStatus() != sf::Music::Stopped)
-        {
-            sf::sleep(sf::seconds(0.1));
-        }
     }
 
     void stopMedia() override
@@ -52,7 +51,7 @@ public:
 
     float getDurationSeconds() const override
     {
-        return music.getDuration().asSeconds();
+        return cachedDuration;
     }
 
     float getPlayingOffsetSeconds() const override
@@ -73,6 +72,11 @@ public:
     float getVolume() const override
     {
         return music.getVolume();
+    }
+
+    bool isStopped() const override
+    {
+        return music.getStatus() == sf::Music::Stopped;
     }
 };
 

@@ -216,6 +216,8 @@ const std::vector<std::shared_ptr<Media>>& MediaManager::getTracks() const
 
 void MediaManager::checkAutoAdvance()
 {
+    player_.update();
+
     if (autoAdvancePending_)
     {
         autoAdvancePending_ = false;
